@@ -69,7 +69,7 @@ ApplicationWindow {
                          page.selectedFile = selectedContentProperties.filePath
                          renderer.command(["loadfile", selectedFile])
                          showStatusbar = false
-                         play_button = true
+                         play_button.visible = true
                      }
                  }
              }
