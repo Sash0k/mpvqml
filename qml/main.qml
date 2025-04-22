@@ -10,11 +10,11 @@ ApplicationWindow {
             id: page
             allowedOrientations: Orientation.All
             property string selectedFile
-            property bool showStatusbar
             property double duration_time
+            property double time_position
+            property bool seek_slider_pressed : false
 
             Component.onCompleted: {
-                showStatusbar = true
             }
 
             function convert_time_to_string(_time){
@@ -36,13 +36,14 @@ ApplicationWindow {
                 anchors.fill: parent
                 onUpdateTimePos: {
                     if (!fadeRect.folded){
-                        timeprogressbar.value = _time
+                        if (!seek_slider_pressed)
+                            timeprogressbar.value = _time
+                        time_position = _time
                         time_pos.text = convert_time_to_string(_time)
                     }
                 }
                 onUpdateDuration: {
                     duration_time = _time
-                    //duration.text = new Date(duration_time*1000).toLocaleTimeString(Qt.locale(), "hh:" + "mm:" + "ss" ) 
                     duration.text = convert_time_to_string(_time)
                 }
 
@@ -76,7 +77,6 @@ ApplicationWindow {
                     anchors.bottom: parent.bottom
                     Rectangle{
                         height: Theme.itemSizeSmall
-                        //spacing: 10
                         width: parent.width
                         id: timerow
                         visible: false
@@ -88,13 +88,22 @@ ApplicationWindow {
                             height: Theme.itemSizeSmall
                             text: ""
                         }
-                        ProgressBar {
+                        Slider {
                             id: timeprogressbar
                             minimumValue: 0
                             maximumValue: duration_time
                             anchors.left: time_pos.right
                             anchors.right: duration.left
                             value: 0
+                            onPressedChanged: {
+                                if (!pressed){
+                                    var res_time = timeprogressbar.sliderValue - time_position
+                                    renderer.command(["seek", res_time, "relative"])
+                                    seek_slider_pressed = false
+                                }else{
+                                    seek_slider_pressed = true
+                                }
+                            }
                         }
                         Label {
                            id: duration
@@ -104,14 +113,15 @@ ApplicationWindow {
                            text: ""
                         }
                     }
-                    Row{ 
+                    Rectangle{ 
                         width: parent.width
                         visible: true 
-                        spacing: 10
                         height: Theme.itemSizeSmall
+                        color: "transparent"
                         id: buttons_row
                         Button {
                             anchors.bottom: parent.bottom
+                            anchors.left: parent.left
                             id: play_button
                             width: play_button.height
                             height: Theme.itemSizeSmall
