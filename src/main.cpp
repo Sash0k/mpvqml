@@ -10,7 +10,7 @@ namespace
 {
 void on_mpv_events(void *ctx)
 {
-    Q_UNUSED(ctx)
+    QMetaObject::invokeMethod((MpvObject*)ctx, "on_mpv_events", Qt::QueuedConnection);
 }
 
 void on_mpv_redraw(void *ctx)
@@ -38,7 +38,9 @@ public:
     MpvRenderer(MpvObject *new_obj)
         : obj{new_obj}
     {
-        mpv_set_wakeup_callback(obj->mpv, on_mpv_events, nullptr);
+        mpv_observe_property(obj->mpv, 0, "duration", MPV_FORMAT_DOUBLE);
+        mpv_observe_property(obj->mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
+        mpv_set_wakeup_callback(obj->mpv, on_mpv_events, obj);
     }
 
     virtual ~MpvRenderer()
@@ -91,6 +93,7 @@ public:
         obj->window()->resetOpenGLState();
     }
 };
+
 MpvObject::MpvObject(QQuickItem * parent)
     : QQuickFramebufferObject(parent), mpv{mpv_create()}, mpv_gl(nullptr)
 {
@@ -119,6 +122,51 @@ MpvObject::~MpvObject()
     }
 
     mpv_terminate_destroy(mpv);
+}
+
+void MpvObject::on_mpv_events()
+{
+    // Process all events, until the event queue is empty.
+    while (mpv) {
+        mpv_event *event = mpv_wait_event(mpv, 0);
+        if (event->event_id == MPV_EVENT_NONE) {
+            break;
+        }
+        handle_mpv_event(event);
+    }
+}
+
+void MpvObject::handle_mpv_event(mpv_event *event)
+{
+    switch (event->event_id) {
+    case MPV_EVENT_PROPERTY_CHANGE: {
+        mpv_event_property *prop = (mpv_event_property *)event->data;
+        if (strcmp(prop->name, "time-pos") == 0) {
+            if (prop->format == MPV_FORMAT_DOUBLE) {
+                double time = *(double *)prop->data;
+                emit MpvObject::updateTimePos(time);
+            } else if (prop->format == MPV_FORMAT_NONE) {
+                // The property is unavailable, which probably means playback
+                // was stopped.
+                emit MpvObject::updateTimePos(0);
+            }
+        }else{
+            if (strcmp(prop->name, "duration") == 0) {
+                if (prop->format == MPV_FORMAT_DOUBLE) {
+                    double time = *(double *)prop->data;
+                    emit MpvObject::updateDuration(time);
+                } else if (prop->format == MPV_FORMAT_NONE) {
+                    // The property is unavailable, which probably means playback
+                    // was stopped.
+                    emit MpvObject::updateDuration(0);
+                }
+            }
+        }
+        break;
+    }
+    default: ;
+        // Ignore uninteresting or unknown events.
+    }
 }
 
 void MpvObject::on_update(void *ctx)
