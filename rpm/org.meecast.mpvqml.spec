@@ -21,6 +21,7 @@ Qml frontend for mpv for AuroraOS
 
 %build
 %qmake5
+sed -i "s/ -pie//" Makefile
 %make_build
 
 %install

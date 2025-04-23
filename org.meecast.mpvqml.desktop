@@ -7,7 +7,7 @@ Name=MpvQml
 Name[ru]=MpvQml
 
 [X-Application]
-Permissions=Audio;Downloads;Internet;Music;RemovableMedia;Videos
+Permissions=Audio;Downloads;Internet;Music;RemovableMedia;Videos;UserDirs
 OrganizationName=org.meecast
 ApplicationName=mpvqml
 ExecDBus=/usr/bin/org.meecast.mpvqml
