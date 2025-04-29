@@ -3,6 +3,7 @@ import Sailfish.Silica 1.0
 import Sailfish.Pickers 1.0
 
 import mpvobject 1.0
+import org.meecast.mpvqml 1.0
 
 FullscreenContentPage {
     id: playpage
@@ -12,12 +13,24 @@ FullscreenContentPage {
     property double time_position
     property bool seek_slider_pressed : false
 
+    Settings {
+        id: appSettings
+    }
+
     Component.onCompleted: {
         renderer.command(["loadfile", selectedFile])
+        console.log("pause ", renderer.getProperty("pause"))
         fadeRect.folded = true
         play_button.visible = true
         timerow.visible = true
         main_column.height = timerow.height + buttons_row.height
+    }
+
+    function savePosition(){
+        console.log("eof-reached ", renderer.getProperty("eof-reached"))
+        if (appSettings.savePosition && (!(renderer.getProperty("eof-reached")))){
+            renderer.command(["write-watch-later-config"])
+        }
     }
 
     function convert_time_to_string(_time){
@@ -37,6 +50,21 @@ FullscreenContentPage {
     MpvObject {
         id: renderer
         anchors.fill: parent
+        onPlaybackRestart: {
+            console.log("onPlaybackRestart pause ", renderer.getProperty("pause"))
+            if (renderer.getProperty("pause")){
+                play_button.icon.source = "image://theme/icon-m-play"
+            }
+            console.log("onPlaybackRestart duration ", renderer.getProperty("duration"))
+            duration_time = renderer.getProperty("duration")
+            duration.text = convert_time_to_string(duration_time)
+
+            console.log("onPlaybackRestart time-pos ", renderer.getProperty("time-pos"))
+            time_position = renderer.getProperty("time-pos")
+            timeprogressbar.value = time_position
+            time_pos.text = convert_time_to_string(time_position)
+
+        }
         onUpdateTimePos: {
             if (!fadeRect.folded){
                 if (!seek_slider_pressed)
@@ -75,6 +103,7 @@ FullscreenContentPage {
             }
             icon.source: "image://theme/icon-m-dismiss"
             onClicked: {
+                savePosition()
                 renderer.command(["quit"])
                 pageStack.pop()
             }
@@ -142,6 +171,7 @@ FullscreenContentPage {
                         if (icon.source == "image://theme/icon-m-play"){
                             icon.source = "image://theme/icon-m-pause"
                         }else{
+                            savePosition()
                             icon.source = "image://theme/icon-m-play"
                             fadeRect.folded = !fadeRect.folded
                         }

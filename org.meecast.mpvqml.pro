@@ -9,9 +9,11 @@ PKGCONFIG += \
 
 SOURCES += \
     src/main.cpp \
+    src/settings.cpp \
 
 HEADERS += \
     src/main.h \
+    src/settings.h \
 
 DISTFILES += \
     rpm/org.meecast.mpvqml \

@@ -31,11 +31,13 @@ private Q_SLOTS:
 public slots:
     void command(const QVariant& params);
     void setProperty(const QString& name, const QVariant& value);
+    QVariant getProperty(const QString& name);
 
 signals:
     void onUpdate();
     void updateTimePos(double _time);
     void updateDuration(double _time);
+    void playbackRestart();
 
 private slots:
     void doUpdate();

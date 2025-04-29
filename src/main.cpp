@@ -5,6 +5,7 @@
 
 #include <auroraapp.h>
 #include <QtQuick>
+#include "settings.h"
 
 namespace
 {
@@ -101,8 +102,15 @@ MpvObject::MpvObject(QQuickItem * parent)
         throw std::runtime_error("could not create mpv context");
 
     mpv_set_option_string(mpv, "terminal", "yes");
-    mpv_set_option_string(mpv, "msg-level", "all=v");
+    //mpv_set_option_string(mpv, "msg-level", "all=v");
+    //mpv_set_option_string(mpv, "msg-level", "all=trace");
+    QDir cache_dir = Aurora::Application::cacheDir();
+    QString path = cache_dir.absolutePath() + "/watch_later";
+    if (!QDir(path).exists()){
+        QDir().mkpath(path);
+    }
     mpv_set_option_string(mpv, "vo", "libmpv");
+    mpv_set_option_string(mpv, "watch-later-directory", path.toLatin1());
 
     if (mpv_initialize(mpv) < 0)
         throw std::runtime_error("could not initialize mpv context");
@@ -139,6 +147,10 @@ void MpvObject::on_mpv_events()
 void MpvObject::handle_mpv_event(mpv_event *event)
 {
     switch (event->event_id) {
+    case MPV_EVENT_PLAYBACK_RESTART: {
+        emit MpvObject::playbackRestart();
+        break;
+    }
     case MPV_EVENT_PROPERTY_CHANGE: {
         mpv_event_property *prop = (mpv_event_property *)event->data;
         if (strcmp(prop->name, "time-pos") == 0) {
@@ -191,6 +203,11 @@ void MpvObject::setProperty(const QString& name, const QVariant& value)
     mpv::qt::set_property_variant(mpv, name, value);
 }
 
+QVariant MpvObject::getProperty(const QString& name)
+{
+   return mpv::qt::get_property_variant(mpv, name);
+}
+
 QQuickFramebufferObject::Renderer *MpvObject::createRenderer() const
 {
     window()->setPersistentOpenGLContext(true);
@@ -207,6 +224,7 @@ int main(int argc, char *argv[])
 
 
     qmlRegisterType<MpvObject>("mpvobject", 1, 0, "MpvObject");
+    qmlRegisterType<Settings>("org.meecast.mpvqml", 1, 0, "Settings");
     QScopedPointer<QQuickView> view(Aurora::Application::createView());
     view->setSource(Aurora::Application::pathTo(QStringLiteral("qml/main.qml")));
     view->show();
