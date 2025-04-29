@@ -27,6 +27,7 @@ sed -i "s/ -pie//" Makefile
 %install
 %make_install
 
+
 %files
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
