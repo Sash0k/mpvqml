@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Pickers 1.0
 
@@ -13,14 +13,15 @@ Page {
         id: column
         spacing: Theme.paddingLarge
         width: parent.width
+        topPadding: Theme.paddingLarge
         Image {
             anchors {
                 horizontalCenter: parent.horizontalCenter
             }
             source: "../images/icon.png"
             fillMode: Image.PreserveAspectFit
-            width: implicitWidth / 2
-            height: implicitHeight / 2
+            width: implicitWidth / 1.5 
+            height: implicitHeight / 1.5
         }
         ButtonLayout {
             Button {
@@ -33,7 +34,15 @@ Page {
                 preferredWidth: Theme.buttonWidthMedium
                 text: qsTrId("Play URL")
                 icon.source: "image://theme/icon-m-link"
+                onClicked: pageStack.push(urlInputPage)
             }
+            Button {
+                preferredWidth: Theme.buttonWidthMedium
+                text: qsTrId("Settings")
+                icon.source: "image://theme/icon-m-developer-mode"
+                onClicked: pageStack.push(Qt.resolvedUrl("settings.qml"))
+            }
+
         }
     }
 
@@ -46,4 +55,30 @@ Page {
              }
          }
      }
+    Component {
+         id: urlInputPage
+         Page {
+            id: urlinputpage
+            PageHeader {
+                title: qsTrId("Open URL")
+            }
+            TextField {
+                focus: true
+                anchors.centerIn: parent
+                id: urlinput
+                label: qsTrId("Input URL")
+                EnterKey.iconSource: "image://theme/icon-m-enter-next"
+                EnterKey.onClicked: pageStack.push(Qt.resolvedUrl("play.qml"), {selectedFile: urlinput.text})
+            }
+            Button {
+                anchors.horizontalCenter: parent.horizontalCenter
+                preferredWidth: Theme.buttonWidthMedium
+                anchors.top: urlinput.bottom
+                text: qsTrId("Ok")
+                icon.source: "image://theme/icon-m-link"
+                onClicked: pageStack.push(Qt.resolvedUrl("play.qml"), {selectedFile: urlinput.text})
+            }
+         }
+     }
+
 }
