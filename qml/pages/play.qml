@@ -4,7 +4,7 @@ import Sailfish.Pickers 1.0
 
 import mpvobject 1.0
 
-Page {
+FullscreenContentPage {
     id: playpage
     allowedOrientations: Orientation.All
     property string selectedFile: ""
@@ -61,12 +61,24 @@ Page {
             }
         }
     }
-    Row {
+    Rectangle {
         id: fadeRect
-        anchors.bottom: parent.bottom
+        anchors.fill: parent
         width: parent.width
-        height: 2*Theme.itemSizeSmall
+        color: "transparent"
         property bool folded: false
+        IconButton {
+            y: Theme.paddingLarge
+            anchors {
+                right: parent.right
+                rightMargin: Theme.paddingSmall
+            }
+            icon.source: "image://theme/icon-m-dismiss"
+            onClicked: {
+                renderer.command(["quit"])
+                pageStack.pop()
+            }
+        }
         Column{
             id: main_column
             height: buttons_row.height
@@ -82,6 +94,7 @@ Page {
                     id: time_pos
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
+                    anchors.leftMargin: Theme.paddingSmall
                     height: Theme.itemSizeSmall
                     text: ""
                 }
@@ -103,11 +116,12 @@ Page {
                     }
                 }
                 Label {
-                   id: duration
-                   anchors.bottom: parent.bottom
-                   anchors.right: parent.right
-                   height: Theme.itemSizeSmall
-                   text: ""
+                    id: duration
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    anchors.rightMargin: Theme.paddingSmall
+                    height: Theme.itemSizeSmall
+                    text: ""
                 }
             }
             Row{ 
