@@ -12,6 +12,8 @@ FullscreenContentPage {
     property double duration_time
     property double time_position
     property bool seek_slider_pressed : false
+    property variant speeds: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
+    property int index_speed : 2
 
     Settings {
         id: appSettings
@@ -19,15 +21,12 @@ FullscreenContentPage {
 
     Component.onCompleted: {
         renderer.command(["loadfile", selectedFile])
-        console.log("pause ", renderer.getProperty("pause"))
         fadeRect.folded = true
-        play_button.visible = true
         timerow.visible = true
         main_column.height = timerow.height + buttons_row.height
     }
 
     function savePosition(){
-        console.log("eof-reached ", renderer.getProperty("eof-reached"))
         if (appSettings.savePosition && (!(renderer.getProperty("eof-reached")))){
             renderer.command(["write-watch-later-config"])
         }
@@ -51,19 +50,22 @@ FullscreenContentPage {
         id: renderer
         anchors.fill: parent
         onPlaybackRestart: {
-            console.log("onPlaybackRestart pause ", renderer.getProperty("pause"))
             if (renderer.getProperty("pause")){
                 play_button.icon.source = "image://theme/icon-m-play"
             }
-            console.log("onPlaybackRestart duration ", renderer.getProperty("duration"))
             duration_time = renderer.getProperty("duration")
             duration.text = convert_time_to_string(duration_time)
-
-            console.log("onPlaybackRestart time-pos ", renderer.getProperty("time-pos"))
             time_position = renderer.getProperty("time-pos")
             timeprogressbar.value = time_position
             time_pos.text = convert_time_to_string(time_position)
-
+            var new_speed = renderer.getProperty("speed")
+            text_speed.text = new_speed.toFixed(2) + "X"
+            index_speed = 2
+            for ( var i = 0; i < speeds.length; i++){
+                if (speeds[i] == new_speed){
+                    index_speed = i
+                }
+            }
         }
         onUpdateTimePos: {
             if (!fadeRect.folded){
@@ -154,17 +156,45 @@ FullscreenContentPage {
                 }
             }
             Row{ 
-                width: parent.width
+                //width: parent.width
                 visible: true 
                 height: Theme.itemSizeSmall
                 id: buttons_row
                 spacing: Theme.paddingLarge
                 anchors.horizontalCenter: parent.horizontalCenter
+                Rectangle {
+                    id: null_button
+                    color: "transparent"
+                    width: play_button.height
+                    height: play_button.height
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                        }
+                    }
+                    Label {
+                        anchors.verticalCenter: parent.verticalCenter
+                        id: text_null
+                        text: ""
+                    }
+                }
+
+                IconButton {
+                    id: back_button_10s
+                    width: play_button.height
+                    height: Theme.itemSizeSmall
+                    visible: true
+                    icon.source: "image://theme/icon-m-10s-back"
+                    onClicked: {
+                        renderer.command(["seek", -10.0])
+                    }
+                }
+
                 IconButton {
                     id: play_button
                     width: play_button.height
                     height: Theme.itemSizeSmall
-                    visible: false
+                    visible: true
                     icon.source: "image://theme/icon-m-pause"
                     onClicked: {
                         renderer.command(["cycle", "pause"])
@@ -175,6 +205,41 @@ FullscreenContentPage {
                             icon.source = "image://theme/icon-m-play"
                             fadeRect.folded = !fadeRect.folded
                         }
+                    }
+                }
+                IconButton {
+                    id: forward_button_10s
+                    width: play_button.height
+                    height: Theme.itemSizeSmall
+                    visible: true
+                    icon.source: "image://theme/icon-m-10s-forward"
+                    onClicked: {
+                        renderer.command(["seek", 10.0, "relative"])
+                    }
+                }
+
+                Rectangle {
+                    id: speed_button
+                    color: "transparent"
+                    width: play_button.height
+                    height: play_button.height
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            if (index_speed < speeds.length - 1){
+                                index_speed = index_speed + 1
+                            }else{
+                                index_speed = 0
+                            }
+                            var new_speed = speeds[index_speed] 
+                            text_speed.text = new_speed.toFixed(2) + "X"
+                            renderer.setProperty("speed", new_speed)
+                        }
+                    }
+                    Label {
+                        anchors.verticalCenter: parent.verticalCenter
+                        id: text_speed
+                        text: "1.00X"
                     }
                 }
             }
