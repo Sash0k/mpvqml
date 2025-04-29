@@ -1,7 +1,7 @@
 %define __requires_exclude ^.*Qt_5_PRIVATE_API.*$
 Name:       org.meecast.mpvqml
 Summary:    Mpv with Qml
-Version:    0.1
+Version:    0.2
 Release:    1
 License:    GPL-2.0
 URL:        https://meecast.org
@@ -34,3 +34,12 @@ sed -i "s/ -pie//" Makefile
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
+
+%changelog
+* Tue Apr 29 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.2-1
+- Added main view
+- Added save position setting
+- Added buttons forward and back 10 seconds
+- Added URL source for play video
+
+
