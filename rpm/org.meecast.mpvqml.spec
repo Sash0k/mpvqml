@@ -38,6 +38,8 @@ sed -i "s/ -pie//" Makefile
 
 %changelog
 * Tue Apr 29 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.2-1
+- Fixed select video file error in Aurora4 in landscape mode
+* Tue Apr 29 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.2-1
 - Added main view
 - Added save position setting
 - Added buttons forward and back 10 seconds
