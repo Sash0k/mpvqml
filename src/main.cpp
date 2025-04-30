@@ -3,7 +3,7 @@
 #include <clocale>
 
 
-#include <auroraapp.h>
+#include <sailfishapp.h>
 #include <QtQuick>
 #include "settings.h"
 
@@ -104,7 +104,7 @@ MpvObject::MpvObject(QQuickItem * parent)
     mpv_set_option_string(mpv, "terminal", "yes");
     //mpv_set_option_string(mpv, "msg-level", "all=v");
     //mpv_set_option_string(mpv, "msg-level", "all=trace");
-    QDir cache_dir = Aurora::Application::cacheDir();
+    QDir cache_dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
     QString path = cache_dir.absolutePath() + "/watch_later";
     if (!QDir(path).exists()){
         QDir().mkpath(path);
@@ -217,7 +217,7 @@ QQuickFramebufferObject::Renderer *MpvObject::createRenderer() const
 
 int main(int argc, char *argv[])
 {
-    QScopedPointer<QGuiApplication> application(Aurora::Application::application(argc, argv));
+    QScopedPointer<QGuiApplication> application(SailfishApp::application(argc, argv));
     application->setOrganizationName(QStringLiteral("org.meecast"));
     application->setApplicationName(QStringLiteral("mpvqml"));
     std::setlocale(LC_NUMERIC, "C");
@@ -225,8 +225,8 @@ int main(int argc, char *argv[])
 
     qmlRegisterType<MpvObject>("mpvobject", 1, 0, "MpvObject");
     qmlRegisterType<Settings>("org.meecast.mpvqml", 1, 0, "Settings");
-    QScopedPointer<QQuickView> view(Aurora::Application::createView());
-    view->setSource(Aurora::Application::pathTo(QStringLiteral("qml/main.qml")));
+    QScopedPointer<QQuickView> view(SailfishApp::createView());
+    view->setSource(SailfishApp::pathTo(QStringLiteral("qml/main.qml")));
     view->show();
 
     return application->exec();

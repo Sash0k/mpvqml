@@ -1,9 +1,9 @@
-TARGET = org.meecast.mpvqml
+TARGET = harbour-mpvqml
 
 QT += qml
 
 CONFIG += \
-    auroraapp
+    sailfishapp
 
 PKGCONFIG += \
 
@@ -16,12 +16,12 @@ HEADERS += \
     src/settings.h \
 
 DISTFILES += \
-    rpm/org.meecast.mpvqml \
+    rpm/harbour-mpvqml \
 
 #QMAKE_CXXFLAGS += "-fPIC"    
 #QMAKE_LFLAGS += "-no-pie"
-AURORAAPP_ICONS = 86x86 108x108 128x128 172x172
+SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
-CONFIG += auroraapp_i18n
+CONFIG += sailfishapp_i18n
 
 PKGCONFIG += mpv

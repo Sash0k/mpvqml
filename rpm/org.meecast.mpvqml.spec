@@ -1,5 +1,4 @@
-%define __requires_exclude ^.*Qt_5_PRIVATE_API.*$
-Name:       org.meecast.mpvqml
+Name:       harbour-mpvqml
 Summary:    Mpv with Qml
 Version:    0.2
 Release:    1
@@ -8,13 +7,13 @@ URL:        https://meecast.org
 Source0:    %{name}-%{version}.tar.bz2
 
 Requires:   sailfishsilica-qt5 >= 0.10.9
-BuildRequires:  pkgconfig(auroraapp)
+BuildRequires:  pkgconfig(sailfishapp)
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
 
 %description
-Qml frontend for mpv for AuroraOS
+Qml frontend for mpv for SailfishOS
 
 %prep
 %autosetup

@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
 X-Nemo-Application-Type=silica-qt5
-Icon=org.meecast.mpvqml
-Exec=/usr/bin/org.meecast.mpvqml
+Icon=harbour-mpvqml
+Exec=/usr/bin/harbour-mpvqml
 Name=MpvQml
 Name[ru]=MpvQml
 
@@ -10,4 +10,4 @@ Name[ru]=MpvQml
 Permissions=Audio;Downloads;Internet;Music;RemovableMedia;Videos;UserDirs
 OrganizationName=org.meecast
 ApplicationName=mpvqml
-ExecDBus=/usr/bin/org.meecast.mpvqml
+ExecDBus=/usr/bin/harbour-mpvqml
