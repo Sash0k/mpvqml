@@ -4,6 +4,7 @@ import Sailfish.Pickers 1.0
 
 import mpvobject 1.0
 import org.meecast.mpvqml 1.0
+import Nemo.KeepAlive 1.2
 
 FullscreenContentPage {
     id: playpage
@@ -14,6 +15,7 @@ FullscreenContentPage {
     property bool seek_slider_pressed : false
     property variant speeds: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
     property int index_speed : 2
+    property bool prevent_blanking_display: false 
 
     Settings {
         id: appSettings
@@ -46,12 +48,20 @@ FullscreenContentPage {
         }
         return result
     }
+
+    DisplayBlanking {
+        preventBlanking: prevent_blanking_display
+    }
+
     MpvObject {
         id: renderer
         anchors.fill: parent
         onPlaybackRestart: {
             if (renderer.getProperty("pause")){
                 play_button.icon.source = "image://theme/icon-m-play"
+                prevent_blanking_display = false
+            }else{
+                prevent_blanking_display = true
             }
             duration_time = renderer.getProperty("duration")
             duration.text = convert_time_to_string(duration_time)
@@ -60,7 +70,7 @@ FullscreenContentPage {
             time_pos.text = convert_time_to_string(time_position)
             var new_speed = renderer.getProperty("speed")
             text_speed.text = new_speed.toFixed(2) + "X"
-            index_speed = 2
+            index_speed = 2 /* defaut spped = 1.00 */
             for ( var i = 0; i < speeds.length; i++){
                 if (speeds[i] == new_speed){
                     index_speed = i
@@ -199,8 +209,10 @@ FullscreenContentPage {
                     onClicked: {
                         renderer.command(["cycle", "pause"])
                         if (icon.source == "image://theme/icon-m-play"){
+                            prevent_blanking_display = true
                             icon.source = "image://theme/icon-m-pause"
                         }else{
+                            prevent_blanking_display = false
                             savePosition()
                             icon.source = "image://theme/icon-m-play"
                             fadeRect.folded = !fadeRect.folded
