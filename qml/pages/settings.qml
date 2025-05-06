@@ -5,6 +5,7 @@ import org.meecast.mpvqml 1.0
 
 Page {
     id: settings
+    allowedOrientations: Orientation.All
     Settings {
         id: appSettings
     }
@@ -35,6 +36,13 @@ Page {
                 checked: appSettings.savePosition
                 description: qsTrId("Remember current playback position on exit. When the same file is played again mpv will seek to the previous position.")
                 onCheckedChanged: { appSettings.savePosition = savepos.checked }
+            }
+            ButtonLayout {
+                Button {
+                    preferredWidth: Theme.buttonWidthMedium
+                    text: qsTrId("About")
+                    onClicked: pageStack.push(Qt.resolvedUrl("about.qml"))
+                }
             }
         }
     }

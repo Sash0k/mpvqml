@@ -39,6 +39,10 @@ public:
     MpvRenderer(MpvObject *new_obj)
         : obj{new_obj}
     {
+        obj->mpvversion_is_done = false;
+        if (new_obj->objectName() == QString("renderer_about")){
+            qDebug()<<"Init MpvRenderer in about page";
+        }
         mpv_observe_property(obj->mpv, 0, "duration", MPV_FORMAT_DOUBLE);
         mpv_observe_property(obj->mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
         mpv_set_wakeup_callback(obj->mpv, on_mpv_events, obj);
@@ -101,9 +105,12 @@ MpvObject::MpvObject(QQuickItem * parent)
     if (!mpv)
         throw std::runtime_error("could not create mpv context");
 
-    mpv_set_option_string(mpv, "terminal", "yes");
-    //mpv_set_option_string(mpv, "msg-level", "all=v");
+    /* For about page */
+    mpv_request_log_messages(mpv, "trace");
+    mpv_set_option_string(mpv, "msg-level", "cplayer=v");
     //mpv_set_option_string(mpv, "msg-level", "all=trace");
+//    mpv_set_option_string(mpv, "terminal", "yes");
+    mpv_set_option_string(mpv, "terminal", "no");
     QDir cache_dir = Aurora::Application::cacheDir();
     QString path = cache_dir.absolutePath() + "/watch_later";
     if (!QDir(path).exists()){
@@ -130,6 +137,7 @@ MpvObject::~MpvObject()
     }
 
     mpv_terminate_destroy(mpv);
+    mpv = NULL;
 }
 
 void MpvObject::on_mpv_events()
@@ -176,6 +184,19 @@ void MpvObject::handle_mpv_event(mpv_event *event)
         }
         break;
     }
+    case MPV_EVENT_LOG_MESSAGE: {
+        struct mpv_event_log_message *msg = (struct mpv_event_log_message *)event->data;
+        if (strcmp(msg->prefix, "cplayer") == 0 && strcmp(msg->level, "v") == 0 && !mpvversion_is_done) {
+            QString add_text = QString(msg->text);
+            mpvversion.append(add_text);
+            if (add_text.startsWith("Configuration:")){
+                mpvversion_is_done = true;
+                emit mpvVersionIsDone(mpvversion);
+            }
+        }
+        break;
+    }
+
     default: ;
         // Ignore uninteresting or unknown events.
     }
@@ -206,6 +227,11 @@ void MpvObject::setProperty(const QString& name, const QVariant& value)
 QVariant MpvObject::getProperty(const QString& name)
 {
    return mpv::qt::get_property_variant(mpv, name);
+}
+
+QString MpvObject::getMpvVersion()
+{
+   return this->mpvversion;
 }
 
 QQuickFramebufferObject::Renderer *MpvObject::createRenderer() const

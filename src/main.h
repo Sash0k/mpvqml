@@ -25,6 +25,9 @@ public:
     virtual ~MpvObject();
     virtual Renderer *createRenderer() const;
 
+private:
+    QString mpvversion;
+    bool mpvversion_is_done;
 private Q_SLOTS:
     void on_mpv_events();
 
@@ -32,8 +35,10 @@ public slots:
     void command(const QVariant& params);
     void setProperty(const QString& name, const QVariant& value);
     QVariant getProperty(const QString& name);
+    QString getMpvVersion();
 
 signals:
+    void mpvVersionIsDone(QString version);
     void onUpdate();
     void updateTimePos(double _time);
     void updateDuration(double _time);
