@@ -109,8 +109,8 @@ MpvObject::MpvObject(QQuickItem * parent)
     mpv_request_log_messages(mpv, "trace");
     mpv_set_option_string(mpv, "msg-level", "cplayer=v");
     //mpv_set_option_string(mpv, "msg-level", "all=trace");
-//    mpv_set_option_string(mpv, "terminal", "yes");
-    mpv_set_option_string(mpv, "terminal", "no");
+    mpv_set_option_string(mpv, "terminal", "yes");
+//    mpv_set_option_string(mpv, "terminal", "no");
     QDir cache_dir = Aurora::Application::cacheDir();
     QString path = cache_dir.absolutePath() + "/watch_later";
     if (!QDir(path).exists()){
@@ -186,10 +186,10 @@ void MpvObject::handle_mpv_event(mpv_event *event)
     }
     case MPV_EVENT_LOG_MESSAGE: {
         struct mpv_event_log_message *msg = (struct mpv_event_log_message *)event->data;
-        if (strcmp(msg->prefix, "cplayer") == 0 && strcmp(msg->level, "v") == 0 && !mpvversion_is_done) {
+        if (!mpvversion_is_done && strcmp(msg->prefix, "cplayer") == 0 && strcmp(msg->level, "v") == 0) {
             QString add_text = QString(msg->text);
             mpvversion.append(add_text);
-            if (add_text.startsWith("Configuration:")){
+            if (add_text.startsWith("List of enabled features:")){
                 mpvversion_is_done = true;
                 emit mpvVersionIsDone(mpvversion);
             }

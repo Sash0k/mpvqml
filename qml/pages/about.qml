@@ -46,9 +46,10 @@ Page {
             SectionHeader {
                 text: qsTrId("MpvQMl") + " version " + "0.2 " + "based on: "
             }
-            Label {
+            TextArea {
                 id: version_label
-                truncationMode: TruncationMode.Elide
+                readOnly: true
+                //truncationMode: TruncationMode.Elide
             }
         }
     }
