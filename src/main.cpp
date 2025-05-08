@@ -158,9 +158,15 @@ void MpvObject::on_mpv_events()
 
 void MpvObject::handle_mpv_event(mpv_event *event)
 {
+    //if (event->event_id != 2)
+    //    fprintf(stderr, "Event %i\n",event->event_id);
     switch (event->event_id) {
     case MPV_EVENT_PLAYBACK_RESTART: {
         emit MpvObject::playbackRestart();
+        break;
+    }
+    case MPV_EVENT_FILE_LOADED: {
+        emit MpvObject::fileLoaded();
         break;
     }
     case MPV_EVENT_PROPERTY_CHANGE: {

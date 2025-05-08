@@ -44,7 +44,7 @@ Page {
                 title: qsTrId("About MpvQML")
             }
             SectionHeader {
-                text: qsTrId("MpvQMl") + " version " + "0.2 " + "based on: "
+                text: qsTrId("MpvQMl") + " version " + "0.3 " + "based on: "
             }
             TextArea {
                 id: version_label

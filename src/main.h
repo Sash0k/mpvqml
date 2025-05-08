@@ -43,6 +43,7 @@ signals:
     void updateTimePos(double _time);
     void updateDuration(double _time);
     void playbackRestart();
+    void fileLoaded();
 
 private slots:
     void doUpdate();

@@ -16,6 +16,10 @@ FullscreenContentPage {
     property variant speeds: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
     property int index_speed : 2
     property bool prevent_blanking_display: false 
+    property variant subs: [] 
+    property variant videos: [] 
+    property variant audios: [] 
+    property int current_mpvid: -1
 
     Settings {
         id: appSettings
@@ -56,6 +60,28 @@ FullscreenContentPage {
     MpvObject {
         id: renderer
         anchors.fill: parent
+        onFileLoaded: {
+           console.log("onFileLoaded")
+           var count = renderer.getProperty("track-list/count")
+           for ( var i = 0; i < count; i++){
+               var type = renderer.getProperty("track-list/" + i + "/type") 
+               if (type == "")
+                    continue
+               var mpvid = renderer.getProperty("track-list/" + i + "/id")
+               var langid = renderer.getProperty("track-list/" + i + "/lang")
+               var title = renderer.getProperty("track-list/" + i + "/title")
+               var item = {mpvid: {"mpvid":mpvid, "langid":langid, "title":title}}
+               if (type == "sub"){
+                   subs.push(item)
+               } 
+               if (type == "audio"){
+                   audios.push(item)
+               } 
+               if (type == "video"){
+                   videos.push(item)
+               } 
+           }
+        }
         onPlaybackRestart: {
             if (renderer.getProperty("pause")){
                 play_button.icon.source = "image://theme/icon-m-play"
@@ -172,6 +198,7 @@ FullscreenContentPage {
                 id: buttons_row
                 spacing: Theme.paddingLarge
                 anchors.horizontalCenter: parent.horizontalCenter
+                /*
                 Rectangle {
                     id: null_button
                     color: "transparent"
@@ -186,6 +213,39 @@ FullscreenContentPage {
                         anchors.verticalCenter: parent.verticalCenter
                         id: text_null
                         text: ""
+                    }
+                }
+                */
+                IconButton {
+                    id: sub_items
+                    width: play_button.height
+                    height: Theme.itemSizeSmall
+                    visible: true
+                    icon.source: "image://theme/icon-m-browser-popup"
+                    onClicked: {
+                        if (current_mpvid == -1){
+                            current_mpvid = subs[0]["mpvid"]["mpvid"]
+                            Notices.show(subs[0]["mpvid"]["langid"] + " " + subs[0]["mpvid"]["title"], Notice.Short, Notice.Center)
+                        }else{
+                            var myflag = false
+                            for(var value in subs){
+                                if (myflag){
+                                    current_mpvid = subs[value]["mpvid"]["mpvid"]
+                                    Notices.show(subs[value]["mpvid"]["langid"] + " " + subs[value]["mpvid"]["title"], Notice.Short, Notice.Center)
+                                    myflag = false
+                                    break
+                                }
+                                if (subs[value]["mpvid"]["mpvid"] == current_mpvid){
+                                    myflag = true
+                                }    
+                            }
+                            if (myflag){
+                                current_mpvid = subs[0]["mpvid"]["mpvid"]
+                                Notices.show(subs[0]["mpvid"]["langid"] + " " + subs[0]["mpvid"]["title"], Notice.Short, Notice.Center)
+                            }
+                        }
+                        renderer.setProperty("sub", current_mpvid)
+                        //renderer.setProperty("sub", 2)
                     }
                 }
 

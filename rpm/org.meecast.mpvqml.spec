@@ -42,6 +42,7 @@ sed -i "s/ -pie//" Makefile
 - Fixed prevent blanking screen
 - Added About page
 - Added information about mpv version and features to About page
+- Added subtitle's button  for changing it
 * Tue Apr 29 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.2-1
 - Added main view
 - Added save position setting
