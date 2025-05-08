@@ -63,6 +63,9 @@ FullscreenContentPage {
         onFileLoaded: {
            console.log("onFileLoaded")
            var count = renderer.getProperty("track-list/count")
+
+           var item = {mpvid: {"mpvid":-1, "langid":"", "title":"no"}}
+           subs.push(item)
            for ( var i = 0; i < count; i++){
                var type = renderer.getProperty("track-list/" + i + "/type") 
                if (type == "")
@@ -224,8 +227,8 @@ FullscreenContentPage {
                     icon.source: "image://theme/icon-m-browser-popup"
                     onClicked: {
                         if (current_mpvid == -1){
-                            current_mpvid = subs[0]["mpvid"]["mpvid"]
-                            Notices.show(subs[0]["mpvid"]["langid"] + " " + subs[0]["mpvid"]["title"], Notice.Short, Notice.Center)
+                            current_mpvid = subs[1]["mpvid"]["mpvid"]
+                            Notices.show(subs[1]["mpvid"]["langid"] + " " + subs[1]["mpvid"]["title"], Notice.Short, Notice.Center)
                         }else{
                             var myflag = false
                             for(var value in subs){
@@ -244,7 +247,11 @@ FullscreenContentPage {
                                 Notices.show(subs[0]["mpvid"]["langid"] + " " + subs[0]["mpvid"]["title"], Notice.Short, Notice.Center)
                             }
                         }
-                        renderer.setProperty("sub", current_mpvid)
+                        if (current_mpvid == -1)
+                            renderer.setProperty("sub", "no")
+                        else{
+                            renderer.setProperty("sub", current_mpvid)
+                        }
                         //renderer.setProperty("sub", 2)
                     }
                 }
