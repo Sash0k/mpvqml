@@ -49,7 +49,6 @@ Page {
             TextArea {
                 id: version_label
                 readOnly: true
-                //truncationMode: TruncationMode.Elide
             }
         }
     }

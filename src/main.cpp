@@ -109,6 +109,7 @@ MpvObject::MpvObject(QQuickItem * parent)
     mpv_request_log_messages(mpv, "trace");
     mpv_set_option_string(mpv, "msg-level", "cplayer=v");
     //mpv_set_option_string(mpv, "msg-level", "all=trace");
+    //mpv_set_option_string(mpv, "msg-level", "all=debug");
     mpv_set_option_string(mpv, "terminal", "yes");
 //    mpv_set_option_string(mpv, "terminal", "no");
     QDir cache_dir = Aurora::Application::cacheDir();
@@ -117,6 +118,9 @@ MpvObject::MpvObject(QQuickItem * parent)
         QDir().mkpath(path);
     }
     mpv_set_option_string(mpv, "vo", "libmpv");
+    // apply phone-optimized defaults
+    mpv_set_option_string(mpv, "profile", "fast");
+    //mpv_set_option_string(mpv, "opengl-es", "yes");
     mpv_set_option_string(mpv, "watch-later-directory", path.toLatin1());
 
     if (mpv_initialize(mpv) < 0)
@@ -243,6 +247,19 @@ QQuickFramebufferObject::Renderer *MpvObject::createRenderer() const
 
 int main(int argc, char *argv[])
 {
+    //Some more speed & memory improvements
+    setenv("QT_NO_FAST_MOVE", "0", 0);
+    setenv("QT_NO_FT_CACHE","0",0);
+    setenv("QT_NO_FAST_SCROLL","0",0);
+    setenv("QT_NO_ANTIALIASING","1",1);
+    setenv("QT_NO_FREE","0",0);
+    setenv("QT_PREDICT_FUTURE", "1", 1);
+    setenv("QT_NO_BUG", "1", 1);
+    setenv("QT_NO_QT", "1", 1);
+    // Taken from sailfish-browser
+    setenv("USE_ASYNC", "1", 1);
+    QQuickWindow::setDefaultAlphaBuffer(true);
+
     QScopedPointer<QGuiApplication> application(Aurora::Application::application(argc, argv));
     application->setOrganizationName(QStringLiteral("org.meecast"));
     application->setApplicationName(QStringLiteral("mpvqml"));
