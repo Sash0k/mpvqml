@@ -1,6 +1,6 @@
 Name:       harbour-mpvqml
 Summary:    Mpv with Qml
-Version:    0.2
+Version:    0.3
 Release:    1
 License:    GPL-2.0
 URL:        https://meecast.org
@@ -36,6 +36,12 @@ sed -i "s/ -pie//" Makefile
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %changelog
+* Tue Apr 29 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.3-1
+- Fixed bug with video file selection in Aurora4 in landscape mode
+- Fixed prevent blanking screen
+- Added About page
+- Added information about mpv version and features to About page
+- Added subtitle's button  for changing it
 * Tue Apr 29 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.2-1
 - Added main view
 - Added save position setting

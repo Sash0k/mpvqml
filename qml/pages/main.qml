@@ -49,6 +49,7 @@ Page {
     Component {
          id: filePickerPage
          FilePickerPage {
+             allowedOrientations: Orientation.All
              nameFilters: [ '*.*' ]
              onSelectedContentPropertiesChanged: {
                  pageStack.push(Qt.resolvedUrl("play.qml"), {selectedFile: selectedContentProperties.filePath})

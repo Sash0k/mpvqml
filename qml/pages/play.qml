@@ -4,6 +4,7 @@ import Sailfish.Pickers 1.0
 
 import mpvobject 1.0
 import org.meecast.mpvqml 1.0
+import Nemo.KeepAlive 1.2
 
 FullscreenContentPage {
     id: playpage
@@ -14,6 +15,11 @@ FullscreenContentPage {
     property bool seek_slider_pressed : false
     property variant speeds: [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0]
     property int index_speed : 2
+    property bool prevent_blanking_display: false 
+    property variant subs: [] 
+    property variant videos: [] 
+    property variant audios: [] 
+    property int current_mpvid: -1
 
     Settings {
         id: appSettings
@@ -46,12 +52,45 @@ FullscreenContentPage {
         }
         return result
     }
+
+    DisplayBlanking {
+        preventBlanking: prevent_blanking_display
+    }
+
     MpvObject {
         id: renderer
         anchors.fill: parent
+        onFileLoaded: {
+           console.log("onFileLoaded")
+           var count = renderer.getProperty("track-list/count")
+
+           var item = {mpvid: {"mpvid":-1, "langid":"", "title":"no"}}
+           subs.push(item)
+           for ( var i = 0; i < count; i++){
+               var type = renderer.getProperty("track-list/" + i + "/type") 
+               if (type == "")
+                    continue
+               var mpvid = renderer.getProperty("track-list/" + i + "/id")
+               var langid = renderer.getProperty("track-list/" + i + "/lang")
+               var title = renderer.getProperty("track-list/" + i + "/title")
+               var item = {mpvid: {"mpvid":mpvid, "langid":langid, "title":title}}
+               if (type == "sub"){
+                   subs.push(item)
+               } 
+               if (type == "audio"){
+                   audios.push(item)
+               } 
+               if (type == "video"){
+                   videos.push(item)
+               } 
+           }
+        }
         onPlaybackRestart: {
             if (renderer.getProperty("pause")){
                 play_button.icon.source = "image://theme/icon-m-play"
+                prevent_blanking_display = false
+            }else{
+                prevent_blanking_display = true
             }
             duration_time = renderer.getProperty("duration")
             duration.text = convert_time_to_string(duration_time)
@@ -60,7 +99,7 @@ FullscreenContentPage {
             time_pos.text = convert_time_to_string(time_position)
             var new_speed = renderer.getProperty("speed")
             text_speed.text = new_speed.toFixed(2) + "X"
-            index_speed = 2
+            index_speed = 2 /* defaut spped = 1.00 */
             for ( var i = 0; i < speeds.length; i++){
                 if (speeds[i] == new_speed){
                     index_speed = i
@@ -162,6 +201,7 @@ FullscreenContentPage {
                 id: buttons_row
                 spacing: Theme.paddingLarge
                 anchors.horizontalCenter: parent.horizontalCenter
+                /*
                 Rectangle {
                     id: null_button
                     color: "transparent"
@@ -176,6 +216,43 @@ FullscreenContentPage {
                         anchors.verticalCenter: parent.verticalCenter
                         id: text_null
                         text: ""
+                    }
+                }
+                */
+                IconButton {
+                    id: sub_items
+                    width: play_button.height
+                    height: Theme.itemSizeSmall
+                    visible: true
+                    icon.source: "image://theme/icon-m-browser-popup"
+                    onClicked: {
+                        if (current_mpvid == -1){
+                            current_mpvid = subs[1]["mpvid"]["mpvid"]
+                            Notices.show(subs[1]["mpvid"]["langid"] + " " + subs[1]["mpvid"]["title"], Notice.Short, Notice.Center)
+                        }else{
+                            var myflag = false
+                            for(var value in subs){
+                                if (myflag){
+                                    current_mpvid = subs[value]["mpvid"]["mpvid"]
+                                    Notices.show(subs[value]["mpvid"]["langid"] + " " + subs[value]["mpvid"]["title"], Notice.Short, Notice.Center)
+                                    myflag = false
+                                    break
+                                }
+                                if (subs[value]["mpvid"]["mpvid"] == current_mpvid){
+                                    myflag = true
+                                }    
+                            }
+                            if (myflag){
+                                current_mpvid = subs[0]["mpvid"]["mpvid"]
+                                Notices.show(subs[0]["mpvid"]["langid"] + " " + subs[0]["mpvid"]["title"], Notice.Short, Notice.Center)
+                            }
+                        }
+                        if (current_mpvid == -1)
+                            renderer.setProperty("sub", "no")
+                        else{
+                            renderer.setProperty("sub", current_mpvid)
+                        }
+                        //renderer.setProperty("sub", 2)
                     }
                 }
 
@@ -199,8 +276,10 @@ FullscreenContentPage {
                     onClicked: {
                         renderer.command(["cycle", "pause"])
                         if (icon.source == "image://theme/icon-m-play"){
+                            prevent_blanking_display = true
                             icon.source = "image://theme/icon-m-pause"
                         }else{
+                            prevent_blanking_display = false
                             savePosition()
                             icon.source = "image://theme/icon-m-play"
                             fadeRect.folded = !fadeRect.folded

@@ -39,6 +39,10 @@ public:
     MpvRenderer(MpvObject *new_obj)
         : obj{new_obj}
     {
+        obj->mpvversion_is_done = false;
+        if (new_obj->objectName() == QString("renderer_about")){
+            qDebug()<<"Init MpvRenderer in about page";
+        }
         mpv_observe_property(obj->mpv, 0, "duration", MPV_FORMAT_DOUBLE);
         mpv_observe_property(obj->mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
         mpv_set_wakeup_callback(obj->mpv, on_mpv_events, obj);
@@ -101,15 +105,22 @@ MpvObject::MpvObject(QQuickItem * parent)
     if (!mpv)
         throw std::runtime_error("could not create mpv context");
 
-    mpv_set_option_string(mpv, "terminal", "yes");
-    //mpv_set_option_string(mpv, "msg-level", "all=v");
+    /* For about page */
+    mpv_request_log_messages(mpv, "trace");
+    mpv_set_option_string(mpv, "msg-level", "cplayer=v");
     //mpv_set_option_string(mpv, "msg-level", "all=trace");
     QDir cache_dir = QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
+    //mpv_set_option_string(mpv, "msg-level", "all=debug");
+    mpv_set_option_string(mpv, "terminal", "yes");
+//    mpv_set_option_string(mpv, "terminal", "no");
     QString path = cache_dir.absolutePath() + "/watch_later";
     if (!QDir(path).exists()){
         QDir().mkpath(path);
     }
     mpv_set_option_string(mpv, "vo", "libmpv");
+    // apply phone-optimized defaults
+    mpv_set_option_string(mpv, "profile", "fast");
+    //mpv_set_option_string(mpv, "opengl-es", "yes");
     mpv_set_option_string(mpv, "watch-later-directory", path.toLatin1());
 
     if (mpv_initialize(mpv) < 0)
@@ -130,6 +141,7 @@ MpvObject::~MpvObject()
     }
 
     mpv_terminate_destroy(mpv);
+    mpv = NULL;
 }
 
 void MpvObject::on_mpv_events()
@@ -146,9 +158,15 @@ void MpvObject::on_mpv_events()
 
 void MpvObject::handle_mpv_event(mpv_event *event)
 {
+    //if (event->event_id != 2)
+    //    fprintf(stderr, "Event %i\n",event->event_id);
     switch (event->event_id) {
     case MPV_EVENT_PLAYBACK_RESTART: {
         emit MpvObject::playbackRestart();
+        break;
+    }
+    case MPV_EVENT_FILE_LOADED: {
+        emit MpvObject::fileLoaded();
         break;
     }
     case MPV_EVENT_PROPERTY_CHANGE: {
@@ -176,6 +194,19 @@ void MpvObject::handle_mpv_event(mpv_event *event)
         }
         break;
     }
+    case MPV_EVENT_LOG_MESSAGE: {
+        struct mpv_event_log_message *msg = (struct mpv_event_log_message *)event->data;
+        if (!mpvversion_is_done && strcmp(msg->prefix, "cplayer") == 0 && strcmp(msg->level, "v") == 0) {
+            QString add_text = QString(msg->text);
+            mpvversion.append(add_text);
+            if (add_text.startsWith("List of enabled features:")){
+                mpvversion_is_done = true;
+                emit mpvVersionIsDone(mpvversion);
+            }
+        }
+        break;
+    }
+
     default: ;
         // Ignore uninteresting or unknown events.
     }
@@ -208,6 +239,11 @@ QVariant MpvObject::getProperty(const QString& name)
    return mpv::qt::get_property_variant(mpv, name);
 }
 
+QString MpvObject::getMpvVersion()
+{
+   return this->mpvversion;
+}
+
 QQuickFramebufferObject::Renderer *MpvObject::createRenderer() const
 {
     window()->setPersistentOpenGLContext(true);
@@ -218,6 +254,18 @@ QQuickFramebufferObject::Renderer *MpvObject::createRenderer() const
 int main(int argc, char *argv[])
 {
     QScopedPointer<QGuiApplication> application(SailfishApp::application(argc, argv));
+    //Some more speed & memory improvements
+    setenv("QT_NO_FAST_MOVE", "0", 0);
+    setenv("QT_NO_FT_CACHE","0",0);
+    setenv("QT_NO_FAST_SCROLL","0",0);
+    setenv("QT_NO_ANTIALIASING","1",1);
+    setenv("QT_NO_FREE","0",0);
+    setenv("QT_PREDICT_FUTURE", "1", 1);
+    setenv("QT_NO_BUG", "1", 1);
+    setenv("QT_NO_QT", "1", 1);
+    // Taken from sailfish-browser
+    setenv("USE_ASYNC", "1", 1);
+    QQuickWindow::setDefaultAlphaBuffer(true);
     application->setOrganizationName(QStringLiteral("org.meecast"));
     application->setApplicationName(QStringLiteral("mpvqml"));
     std::setlocale(LC_NUMERIC, "C");
