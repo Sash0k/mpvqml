@@ -4,6 +4,7 @@ import Sailfish.Pickers 1.0
 
 Page {
     id: mainpage
+    objectName: "mainpage"
     allowedOrientations: Orientation.All
     property bool seek_slider_pressed : false
 
