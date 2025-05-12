@@ -6,6 +6,7 @@
 #include <auroraapp.h>
 #include <QtQuick>
 #include "settings.h"
+#include "dbusadaptor.h"
 
 namespace
 {
@@ -275,6 +276,8 @@ int main(int argc, char *argv[])
     qmlRegisterType<MpvObject>("mpvobject", 1, 0, "MpvObject");
     qmlRegisterType<Settings>("org.meecast.mpvqml", 1, 0, "Settings");
     QScopedPointer<QQuickView> view(Aurora::Application::createView());
+    DBusAdaptor dbusAdaptor(view.data());
+    view->rootContext()->setContextProperty(QStringLiteral("dbusAdaptor"), &dbusAdaptor);
     view->setSource(Aurora::Application::pathTo(QStringLiteral("qml/main.qml")));
     view->show();
 
