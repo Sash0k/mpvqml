@@ -231,8 +231,8 @@ FullscreenContentPage {
                     icon.source: "image://theme/icon-m-file-audio"
                     onClicked: {
                         if (current_audio == -1){
-                            current_audio = audios[1]["mpvid"]["mpvid"]
-                            Notices.show(qsTrId("Audio") + " #" + audios[1]["mpvid"]["langid"] + " " + audios[1]["mpvid"]["title"], Notice.Short, Notice.Center)
+                            current_audio = audios[0]["mpvid"]["mpvid"]
+                            Notices.show(qsTrId("Audio") + " #" + audios[0]["mpvid"]["langid"] + " " + audios[0]["mpvid"]["title"], Notice.Short, Notice.Center)
                         }else{
                             var myflag = false
                             for(var value in audios){
@@ -268,8 +268,8 @@ FullscreenContentPage {
                     icon.source: "image://theme/icon-m-browser-popup"
                     onClicked: {
                         if (current_sub == -1){
-                            current_sub = subs[1]["mpvid"]["mpvid"]
-                            Notices.show(qsTrId("Subtitle") + " #" + subs[1]["mpvid"]["langid"] + " " + subs[1]["mpvid"]["title"], Notice.Short, Notice.Center)
+                            current_sub = subs[0]["mpvid"]["mpvid"]
+                            Notices.show(qsTrId("Subtitle") + " #" + subs[0]["mpvid"]["langid"] + " " + subs[0]["mpvid"]["title"], Notice.Short, Notice.Center)
                         }else{
                             var myflag = false
                             for(var value in subs){
