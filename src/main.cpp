@@ -120,13 +120,13 @@ MpvObject::MpvObject(QQuickItem * parent)
     }
     mpv_set_option_string(mpv, "vo", "libmpv");
     // apply phone-optimized defaults
-    mpv_set_option_string(mpv, "profile", "fast");
     //mpv_set_option_string(mpv, "opengl-es", "yes");
     mpv_set_option_string(mpv, "watch-later-directory", path.toLatin1());
 
     if (mpv_initialize(mpv) < 0)
         throw std::runtime_error("could not initialize mpv context");
 
+    mpv_set_option_string(mpv, "profile", "fast");
     // Request hw decoding, just for testing.
     mpv::qt::set_option_variant(mpv, "hwdec", "auto");
 

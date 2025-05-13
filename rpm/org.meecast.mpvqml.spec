@@ -42,6 +42,7 @@ sed -i "s/ -pie//" Makefile
 - Added dbus to start video playback in mpvqml using FileBrowser on the device
 - Added possibility run application with filename or URL in argument for play it immedetly
 - Added audio's button for changing it
+- Fixed font color when using light theme on About page #1
 * Tue Apr 29 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.3-1
 - Fixed bug with video file selection in Aurora4 in landscape mode
 - Fixed prevent blanking screen
