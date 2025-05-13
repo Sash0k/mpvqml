@@ -38,12 +38,12 @@ sed -i "s/ -pie//" Makefile
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %changelog
-* Tue Apr 29 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.4-1
+* Tue May 13 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.4-1
 - Added dbus to start video playback in mpvqml using FileBrowser on the device
-- Added possibility run application with filename or URL in argument for play it immedetly
+- Added the ability to launch the application (org.meecast.mpvqml) with a file name or URL as an argument to play it immediately.
 - Added audio's button for changing it
 - Fixed font color when using light theme on About page #1
-* Tue Apr 29 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.3-1
+* Fri May 09 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.3-1
 - Fixed bug with video file selection in Aurora4 in landscape mode
 - Fixed prevent blanking screen
 - Added About page
