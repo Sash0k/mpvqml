@@ -15,7 +15,7 @@ Page {
     Component.onCompleted: {
     }
 
-    MpvObject {
+    MpvObjectMock {
         id: renderer_about
         objectName: "renderer_about"
         anchors.fill: parent

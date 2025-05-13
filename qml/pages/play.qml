@@ -58,7 +58,7 @@ FullscreenContentPage {
         preventBlanking: prevent_blanking_display
     }
 
-    MpvObject {
+    MpvObjectMock {
         id: renderer
         anchors.fill: parent
         onFileLoaded: {

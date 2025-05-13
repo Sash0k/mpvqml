@@ -12,12 +12,12 @@ QT += \
 
 SOURCES += \
     src/main.cpp \
-    src/settings.cpp \
+#    src/settings.cpp \
     src/dbusadaptor.cpp \
 
 HEADERS += \
-    src/main.h \
-    src/settings.h \
+#    src/main.h \
+#    src/settings.h \
     src/dbusadaptor.h \
 
 DISTFILES += \
@@ -29,4 +29,4 @@ AURORAAPP_ICONS = 86x86 108x108 128x128 172x172
 
 CONFIG += auroraapp_i18n
 
-PKGCONFIG += mpv
+#PKGCONFIG += mpv
