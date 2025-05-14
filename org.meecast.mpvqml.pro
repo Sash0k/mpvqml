@@ -16,7 +16,7 @@ SOURCES += \
     src/dbusadaptor.cpp \
 
 HEADERS += \
-#    src/main.h \
+    src/main.h \
     src/settings.h \
     src/dbusadaptor.h \
 
@@ -27,6 +27,11 @@ DISTFILES += \
 #QMAKE_LFLAGS += "-no-pie"
 AURORAAPP_ICONS = 86x86 108x108 128x128 172x172
 
-CONFIG += auroraapp_i18n
+CONFIG += \
+    auroraapp_i18n_idbased \
+    auroraapp_i18n \
 
-#PKGCONFIG += mpv
+TRANSLATIONS = \
+   translations/org.meecast.mpvqml-ru.ts \
+
+PKGCONFIG += mpv

@@ -15,7 +15,7 @@ Page {
     Component.onCompleted: {
     }
 
-    MpvObjectMock {
+    MpvObject {
         id: renderer_about
         objectName: "renderer_about"
         height: 1
@@ -45,7 +45,7 @@ Page {
                 title: qsTrId("About MpvQML")
             }
             SectionHeader {
-                text: qsTrId("MpvQML") + " version " + "0.4 " + "based on: "
+                text: "MpvQML " + qsTrId("version") + " 0.4 " + qsTrId("based on:")
             }
             TextArea {
                 id: version_label
