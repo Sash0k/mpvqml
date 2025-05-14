@@ -20,6 +20,11 @@ Item {
         console.log("called setProperty: " + name + " | " + value)
     }
 
+    function getProperty(name) {
+        console.log("called getProperty: " + name)
+        return name
+    }
+
     Rectangle {
         id: mock
         anchors.fill: parent

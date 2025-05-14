@@ -12,12 +12,12 @@ QT += \
 
 SOURCES += \
     src/main.cpp \
-#    src/settings.cpp \
+    src/settings.cpp \
     src/dbusadaptor.cpp \
 
 HEADERS += \
 #    src/main.h \
-#    src/settings.h \
+    src/settings.h \
     src/dbusadaptor.h \
 
 DISTFILES += \
