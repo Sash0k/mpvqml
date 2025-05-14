@@ -27,6 +27,11 @@ DISTFILES += \
 #QMAKE_LFLAGS += "-no-pie"
 AURORAAPP_ICONS = 86x86 108x108 128x128 172x172
 
-CONFIG += auroraapp_i18n
+CONFIG += \
+    auroraapp_i18n_idbased \
+    auroraapp_i18n \
+
+TRANSLATIONS = \
+   translations/org.meecast.mpvqml-ru.ts \
 
 PKGCONFIG += mpv
