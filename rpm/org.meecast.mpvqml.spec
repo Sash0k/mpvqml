@@ -1,7 +1,7 @@
 %define __requires_exclude ^.*Qt_5_PRIVATE_API.*$
 Name:       org.meecast.mpvqml
 Summary:    Mpv with Qml
-Version:    0.4
+Version:    0.5
 Release:    1
 License:    GPL-2.0
 URL:        https://meecast.org
@@ -38,6 +38,8 @@ sed -i "s/ -pie//" Makefile
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %changelog
+* Tue May 15 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.5-1
+- Added Russian translation
 * Tue May 13 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.4-1
 - Added dbus to start video playback in mpvqml using FileBrowser on the device
 - Added the ability to launch the application (org.meecast.mpvqml) with a file name or URL as an argument to play it immediately.
