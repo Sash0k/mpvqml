@@ -7,10 +7,6 @@
         <source></source>
         <translation type="unfinished"></translation>
     </message>
-    <message id="OFF">
-        <source></source>
-        <translation type="unfinished"></translation>
-    </message>
     <message id="About MpvQML">
         <source></source>
         <translation type="unfinished"></translation>
@@ -47,6 +43,22 @@
         <source></source>
         <translation type="unfinished"></translation>
     </message>
+    <message id="Save position on quit">
+        <source></source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="Remember current playback position on exit. When the same file is played again mpv will seek to the previous position.">
+        <source></source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="OFF">
+        <source></source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message id="Volume">
+        <source></source>
+        <translation type="unfinished"></translation>
+    </message>
     <message id="Audio">
         <source></source>
         <translation type="unfinished"></translation>
@@ -55,11 +67,7 @@
         <source></source>
         <translation type="unfinished"></translation>
     </message>
-    <message id="Save position on quit">
-        <source></source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message id="Remember current playback position on exit. When the same file is played again mpv will seek to the previous position.">
+    <message id="Brightness">
         <source></source>
         <translation type="unfinished"></translation>
     </message>

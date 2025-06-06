@@ -38,6 +38,8 @@ sed -i "s/ -pie//" Makefile
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %changelog
+* Sun Jun 07 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.6-1
+- Added gestures for volume and brightness changing 
 * Thu May 15 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.5-1
 - Added Russian translation
 * Tue May 13 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.4-1
