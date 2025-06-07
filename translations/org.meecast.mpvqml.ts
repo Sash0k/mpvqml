@@ -72,4 +72,15 @@
         <translation type="unfinished"></translation>
     </message>
 </context>
+<context>
+    <name>about</name>
+    <message>
+        <source>Source on GitHub</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MpvQML is frontend for mpv</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
 </TS>

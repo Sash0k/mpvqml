@@ -40,6 +40,7 @@ sed -i "s/ -pie//" Makefile
 %changelog
 * Sun Jun 07 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.6-1
 - Added gestures for volume and brightness changing 
+- Updated About page
 * Thu May 15 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.5-1
 - Added Russian translation
 * Tue May 13 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.4-1
