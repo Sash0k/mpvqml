@@ -166,17 +166,22 @@ FullscreenContentPage {
         MouseArea {
             id: mousearea
             anchors.fill: parent
-            property int offset: page.height/20
-            property int offsetHeight: height - (offset*2)
-            property int step: offsetHeight / 10
+            property int offset_height: page.height/20
+            property int offset_width: page.width/20
+            property int offsetHeight: height - (offset_height*2)
+            property int offsetWidth: width - (offset_width*2)
+            property int step_height: offsetHeight / 10
+            property int step_width: 2
             property bool stepChanged: false
             property int brightnessStep: 10
             property int lambdaVolumeStep: -1
+            property int lambdassStep: -1
             property int lambdaBrightnessStep: -1
             property int currentVolume: -1
 
             function calculateStep(mouse) {
-                return Math.round((offsetHeight - (mouse.y-offset)) / step)
+                console.log("x", mouse.x, "offsetWidth", offsetWidth, "step_width", step_width)
+                return [Math.round((offsetHeight - (mouse.y-offset_height)) / step_height), Math.round((offsetWidth - (mouse.x-offset_width)) / step_width)]
             }
 
             onReleased: {
@@ -189,34 +194,22 @@ FullscreenContentPage {
                 }
                 lambdaVolumeStep = -1
                 lambdaBrightnessStep = -1
+                lambdassStep = -1
                 stepChanged = false
             }
 
             onPressed: {
                 pacontrol.update()
-                lambdaBrightnessStep = lambdaVolumeStep = calculateStep(mouse)
-            }
-
-            function doubleClicked(mouse) {
-                var newPos = null
-                if(mouse.x < mousearea.width/2 ) {
-                    newPos = videoPlayer.position - 5000
-                    if(newPos < 0) newPos = 0
-                    videoPlayer.seek(newPos)
-                    backwardIndicator.visible = true
-                } else if (mouse.x > mousearea.width/2) {
-                    newPos = videoPlayer.position + 5000
-                    if(newPos > videoPlayer.duration) {
-                        return
-                    }
-                    videoPlayer.seek(newPos)
-                    forwardIndicator.visible = true
-                }
+                var temp = calculateStep(mouse)
+                lambdaBrightnessStep = lambdaVolumeStep = temp[0]
+                lambdassStep = temp[1]
+                console.log("ssStep1 ", lambdassStep)
             }
 
             Connections {
                 target: pacontrol
                 onVolumeChanged: {
+                    console.log("onVolumeChanged", volume)
                     mousearea.currentVolume = volume
                     if (volume > 10) {
                         mousearea.currentVolume = 10
@@ -226,9 +219,14 @@ FullscreenContentPage {
                 }
             }
             onPositionChanged: {
-                var step = calculateStep(mouse)
-                if((mouse.y - offset) > 0 && (mouse.y + offset) < offsetHeight && mouse.x < mousearea.width/2 && lambdaVolumeStep !== step) {
+                var temp = calculateStep(mouse)
+                var step = temp[0]
+                var ssStep = temp[1]
+                console.log("step", step, ssStep)
+                if((mouse.y - offset_height) > 0 && (mouse.y + offset_height) < offsetHeight && mouse.x < mousearea.width/2 && lambdaVolumeStep !== step) {
+                    console.log("currentVolume", currentVolume, "lambdaVolumeStep", lambdaVolumeStep, "step", step)
                     var curVolume = currentVolume - (lambdaVolumeStep - step)
+                    console.log("SetVolume", curVolume)
                     pacontrol.setVolume(curVolume)
                     if (curVolume > 10) {
                         curVolume = 10
@@ -241,7 +239,7 @@ FullscreenContentPage {
                     lambdaVolumeStep = step
                     pacontrol.update()
                     stepChanged = true
-                } else if ((mouse.y - offset) > 0 && (mouse.y + offset) < offsetHeight && mouse.x > mousearea.width/2 && lambdaBrightnessStep !== step) {
+                } else if ((mouse.y - offset_height) > 0 && (mouse.y + offset_height) < offsetHeight && mouse.x > mousearea.width/2 && lambdaBrightnessStep !== step) {
                     renderer.get_display_brightness()
                     var relativeStep = Math.round(playpage.brightness/brightnessStep) - (lambdaBrightnessStep - step)
                     if (relativeStep > 10) relativeStep = 10;
@@ -253,6 +251,10 @@ FullscreenContentPage {
                     brightness_label.text = qsTrId("Brightness") + ":" + (activeBrightness) + "%"
                     hideBrightness.restart()
                     stepChanged = true
+                } else if (lambdassStep !== ssStep) {
+                    var seekstep = (lambdassStep - ssStep).toFixed(1)
+                    renderer.command(["seek", seekstep])
+                    lambdassStep = ssStep
                 }
             }
         }
