@@ -26,7 +26,15 @@ FullscreenContentPage {
     property int inactiveBrightness: -1
     property int activeBrightness: -1
     property int brightness: -1
-
+    // ratio for trigger, 1/Xth of minimum dimension
+    // for tap gestures this is the distance that must *not* be moved for it to trigger
+    property int trigger_rate: 30
+    // minimum movement which triggers a Control state
+    property int trigger: 0
+    property double ss_begin_time_position: -1
+    property int last_pos_x: -1
+    property int last_pos_y: -1
+    property int interval_timer: 1000 // for show volume, britness and other
 
     Settings {
         id: appSettings
@@ -38,6 +46,7 @@ FullscreenContentPage {
         fadeRect.folded = true
         timerow.visible = true
         main_column.height = timerow.height + buttons_row.height
+        trigger = Math.min(playpage.width, playpage.height) / trigger_rate
     }
 
     Component.onDestruction: {
@@ -71,7 +80,7 @@ FullscreenContentPage {
 
     Timer {
         id: hideVolume
-        interval: 500
+        interval: interval_timer
         running: false
         repeat: false
         onTriggered: {
@@ -81,7 +90,7 @@ FullscreenContentPage {
 
     Timer {
         id: hideBrightness
-        interval: 500
+        interval: interval_timer
         running: false
         repeat: false
         onTriggered: {
@@ -89,11 +98,20 @@ FullscreenContentPage {
         }
     }
 
+    Timer {
+        id: hideSS
+        interval: interval_timer
+        running: false
+        repeat: false
+        onTriggered: {
+            ss_label.visible = false
+        }
+    }
+
     MpvObject {
         id: renderer
         anchors.fill: parent
         onFileLoaded: {
-           console.log("onFileLoaded")
            var count = renderer.getProperty("track-list/count")
 
            var item = {mpvid: {"mpvid":-1, "langid":"", "title":"no"}}
@@ -154,7 +172,6 @@ FullscreenContentPage {
             duration.text = convert_time_to_string(_time)
         }
         onBrightness: {
-            console.log("onBrightness")
             if (inactiveBrightness === -1) {
                 inactiveBrightness = brightness
                 activeBrightness = brightness
@@ -176,11 +193,13 @@ FullscreenContentPage {
             property int brightnessStep: 10
             property int lambdaVolumeStep: -1
             property int lambdassStep: -1
+            property int beginssStep: -1
+            property int endssStep: -1
             property int lambdaBrightnessStep: -1
             property int currentVolume: -1
+            property int _ss_direct: -1 // Direction (default value Unknown -1)
 
             function calculateStep(mouse) {
-                console.log("x", mouse.x, "offsetWidth", offsetWidth, "step_width", step_width)
                 return [Math.round((offsetHeight - (mouse.y-offset_height)) / step_height), Math.round((offsetWidth - (mouse.x-offset_width)) / step_width)]
             }
 
@@ -196,6 +215,8 @@ FullscreenContentPage {
                 lambdaBrightnessStep = -1
                 lambdassStep = -1
                 stepChanged = false
+                last_pos_x = -1
+                last_pos_y = -1
             }
 
             onPressed: {
@@ -203,13 +224,16 @@ FullscreenContentPage {
                 var temp = calculateStep(mouse)
                 lambdaBrightnessStep = lambdaVolumeStep = temp[0]
                 lambdassStep = temp[1]
-                console.log("ssStep1 ", lambdassStep)
+                beginssStep = endssStep = temp[1]
+                _ss_direct = -1  /* Set direction of changing on srceen to status Unknown */
+                last_pos_x = mouse.x
+                last_pos_y = mouse.y
+                ss_begin_time_position = time_position
             }
 
             Connections {
                 target: pacontrol
                 onVolumeChanged: {
-                    console.log("onVolumeChanged", volume)
                     mousearea.currentVolume = volume
                     if (volume > 10) {
                         mousearea.currentVolume = 10
@@ -218,43 +242,86 @@ FullscreenContentPage {
                     }
                 }
             }
+
             onPositionChanged: {
+                if (last_pos_x === -1 || last_pos_y === -1)
+                    return
                 var temp = calculateStep(mouse)
                 var step = temp[0]
                 var ssStep = temp[1]
-                console.log("step", step, ssStep)
-                if((mouse.y - offset_height) > 0 && (mouse.y + offset_height) < offsetHeight && mouse.x < mousearea.width/2 && lambdaVolumeStep !== step) {
-                    console.log("currentVolume", currentVolume, "lambdaVolumeStep", lambdaVolumeStep, "step", step)
-                    var curVolume = currentVolume - (lambdaVolumeStep - step)
-                    console.log("SetVolume", curVolume)
-                    pacontrol.setVolume(curVolume)
-                    if (curVolume > 10) {
-                        curVolume = 10
-                    } else if (curVolume < 0) {
-                        curVolume = 0
+                if (_ss_direct === -1){
+                    // throttle events: only send updates when there's some movement compared to last update
+                    // 4 here is arbitrary
+                    if (Math.max(Math.abs(last_pos_x - mouse.x) , Math.abs(last_pos_y - mouse.y)) < trigger / 4)
+                        return
+                    if (Math.abs(last_pos_x - mouse.x) >  Math.abs(last_pos_y - mouse.y)){
+                        _ss_direct = 1 /* Set direction of changing on srceen to status Changing position of playing video */
+                    }else{
+                        _ss_direct = 0
                     }
-                    volume_label.text = qsTrId("Volume") + ":" + (curVolume*10) + "%"
-                    volume_label.visible = true
-                    hideVolume.restart()
-                    lambdaVolumeStep = step
-                    pacontrol.update()
-                    stepChanged = true
-                } else if ((mouse.y - offset_height) > 0 && (mouse.y + offset_height) < offsetHeight && mouse.x > mousearea.width/2 && lambdaBrightnessStep !== step) {
-                    renderer.get_display_brightness()
-                    var relativeStep = Math.round(playpage.brightness/brightnessStep) - (lambdaBrightnessStep - step)
-                    if (relativeStep > 10) relativeStep = 10;
-                    if (relativeStep < 0) relativeStep = 0;
-                    renderer.set_display_brightness(relativeStep * brightnessStep)
-                    activeBrightness = relativeStep * brightnessStep
-                    lambdaBrightnessStep = step
-                    brightness_label.visible = true
-                    brightness_label.text = qsTrId("Brightness") + ":" + (activeBrightness) + "%"
-                    hideBrightness.restart()
-                    stepChanged = true
-                } else if (lambdassStep !== ssStep) {
-                    var seekstep = (lambdassStep - ssStep).toFixed(1)
-                    renderer.command(["seek", seekstep])
-                    lambdassStep = ssStep
+                }
+                if (_ss_direct === 0){
+                    if((mouse.y - offset_height) > 0 && (mouse.y + offset_height) < offsetHeight && mouse.x < mousearea.width/2 && lambdaVolumeStep !== step) {
+                        var curVolume = currentVolume - (lambdaVolumeStep - step)
+                        pacontrol.setVolume(curVolume)
+                        if (curVolume > 10) {
+                            curVolume = 10
+                        } else if (curVolume < 0) {
+                            curVolume = 0
+                        }
+                        volume_label.text = qsTrId("Volume") + ":" + (curVolume*10) + "%"
+                        volume_label.visible = true
+                        hideVolume.restart()
+                        lambdaVolumeStep = step
+                        pacontrol.update()
+                        stepChanged = true
+                    } else if ((mouse.y - offset_height) > 0 && (mouse.y + offset_height) < offsetHeight && mouse.x > mousearea.width/2 && lambdaBrightnessStep !== step) {
+                        renderer.get_display_brightness()
+                        var relativeStep = Math.round(playpage.brightness/brightnessStep) - (lambdaBrightnessStep - step)
+                        if (relativeStep > 10) relativeStep = 10;
+                        if (relativeStep < 0) relativeStep = 0;
+                        renderer.set_display_brightness(relativeStep * brightnessStep)
+                        activeBrightness = relativeStep * brightnessStep
+                        lambdaBrightnessStep = step
+                        brightness_label.visible = true
+                        brightness_label.text = qsTrId("Brightness") + ":" + (activeBrightness) + "%"
+                        hideBrightness.restart()
+                        stepChanged = true
+                    }
+                }else{
+                    if (lambdassStep !== ssStep) {
+                        var seekstep = lambdassStep - ssStep
+                        var new_time_position = -1
+                        if (time_position + seekstep > 0){
+                            if (time_position + seekstep > duration_time){
+                                renderer.command(["seek", duration_time, "absolute+keyframes"])
+                                new_time_position = duration_time
+                            }else{
+                                renderer.command(["seek", (time_position + seekstep), "absolute+keyframes"])
+                                new_time_position = time_position + seekstep
+                            }
+                        }else{
+                            renderer.command(["seek", 0, "absolute+keyframes"])
+                            new_time_position = 0
+                        }
+                        //new_time_position = renderer.getProperty("time-pos")
+                        endssStep = beginssStep - endssStep + ssStep
+                        var diff_step = new_time_position - ss_begin_time_position
+                        lambdassStep = ssStep
+                        ss_label.visible = true
+                        if (new_time_position < 0  || new_time_position == 0){
+                            new_time_position = 0
+                            diff_step = 0
+                        }
+                        if (diff_step == 0)
+                            ss_label.text = convert_time_to_string(new_time_position) + "\n" + "[" + convert_time_to_string(Math.abs(diff_step)) + "]"
+                        else
+                            if (diff_step < 0)
+                                ss_label.text = convert_time_to_string(new_time_position) + "\n" + "[-" + convert_time_to_string(Math.abs(diff_step)) + "]"
+                            else
+                                ss_label.text = convert_time_to_string(new_time_position) + "\n" + "[+" + convert_time_to_string(diff_step) + "]"
+                            hideSS.restart()
+                    }
                 }
             }
         }
@@ -270,6 +337,14 @@ FullscreenContentPage {
 
     Label {
         id: brightness_label
+        anchors.centerIn: parent
+        font.pixelSize: Theme.fontSizeHuge
+        text: ""
+        visible: false
+    }
+
+    Label {
+        id: ss_label
         anchors.centerIn: parent
         font.pixelSize: Theme.fontSizeHuge
         text: ""

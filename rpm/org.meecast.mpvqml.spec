@@ -1,7 +1,7 @@
 %define __requires_exclude ^.*Qt_5_PRIVATE_API.*$
 Name:       org.meecast.mpvqml
 Summary:    Mpv with Qml
-Version:    0.5
+Version:    0.6
 Release:    1
 License:    GPL-2.0
 URL:        https://meecast.org
@@ -38,8 +38,8 @@ sed -i "s/ -pie//" Makefile
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 
 %changelog
-* Sun Jun 08 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.6-1
-- Added gestures for volume and brightness changing 
+* Mon Jun 23 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.6-1
+- Added gestures for changing volume, brightness and seek
 - Updated About page
 * Thu May 15 2025 Vlad Vasilyeu <vasvlad@gmail.com> - 0.5-1
 - Added Russian translation
