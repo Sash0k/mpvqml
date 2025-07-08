@@ -3,9 +3,13 @@
 
 
 #include <auroraapp.h>
+#include "volume/pulseaudiocontrol.h"
 #include <QtQuick>
 #include "settings.h"
 #include "dbusadaptor.h"
+#include <QDBusMessage>
+#include <QDBusConnection>
+#include <QDBusReply>
 
 int main(int argc, char *argv[])
 {
@@ -45,6 +49,8 @@ int main(int argc, char *argv[])
     QScopedPointer<QQuickView> view(Aurora::Application::createView());
     DBusAdaptor dbusAdaptor(view.data());
     view->rootContext()->setContextProperty(QStringLiteral("dbusAdaptor"), &dbusAdaptor);
+    PulseAudioControl pacontrol;
+    view->rootContext()->setContextProperty("pacontrol", &pacontrol);
     view->setSource(Aurora::Application::pathTo(QStringLiteral("qml/main.qml")));
 
     QObject *object = view->rootObject();
