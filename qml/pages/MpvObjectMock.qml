@@ -9,6 +9,7 @@ Item {
     signal onUpdate()
     signal updateTimePos(double _time)
     signal updateDuration(double _time)
+    signal brightness()
     signal playbackRestart()
     signal fileLoaded()
 
@@ -23,6 +24,15 @@ Item {
     function getProperty(name) {
         console.log("called getProperty: " + name)
         return name
+    }
+
+    function set_display_brightness(value) {
+        console.log("called set_display_brightness: " + value)
+        return value
+    }
+
+    function get_display_brightness() {
+        console.log("called get_display_brightness")
     }
 
     Rectangle {
